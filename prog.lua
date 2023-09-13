@@ -47,8 +47,8 @@ function TTable:paint()
     if line then
         if i+self.shift==self.index then gpu.setForeground(self.sfColor) gpu.setBackground(self.selColor) end
         gpu.set(self.X+b,self.Y+i+b, padRight(sub(line.label,1,w - b),w - b))
-        gpu.set(self.X+b + w,self.Y+i+b, padRight(sub(line.count,1,w),w))
-        gpu.set(self.X+b + 2 * w,self.Y+i+b, padRight(sub(line.delta,1,w - b),w - b))
+        gpu.set(self.X+b + w,self.Y+i+b, padRight(sub(formatNum(line.count),1,w),w))
+        gpu.set(self.X+b + 2 * w,self.Y+i+b, padRight(sub(formatNum(line.delta),1,w - b),w - b))
         if i+self.shift==self.index then gpu.setForeground(self.fontColor) gpu.setBackground(self.color) end
     end
   end
