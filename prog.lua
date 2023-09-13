@@ -30,7 +30,7 @@ end
 
 ------- TTable
 
-local TTable=setmetatable({W=20, H=10, border=2, selColor=0x0000ff, sfColor=0xffff00, shift=0, index=0,
+local TTable=setmetatable({W=Form.W, H=Form.H, border=2, selColor=0x0000ff, sfColor=0xffff00, shift=0, index=0,
   type=function() return "Table" end},Form.__index)
 TTable.__index=TTable
 
@@ -44,16 +44,13 @@ function TTable:paint()
 
   for i=1,self.H-2*b do
     local line = self.lines[i+self.shift]
-    local text = ""
     if line then
-        text = line.label .. "\t\t" .. line.count .. "\t\t" .. line.delta
+        if i+self.shift==self.index then gpu.setForeground(self.sfColor) gpu.setBackground(self.selColor) end
+        gpu.set(self.X+b,self.Y+i+b, padRight(sub(line.label,1,w - b),w - b))
+        gpu.set(self.X+b + w,self.Y+i+b, padRight(sub(line.count,1,w),w))
+        gpu.set(self.X+b + 2 * w,self.Y+i+b, padRight(sub(line.delta,1,w - b),w - b))
+        if i+self.shift==self.index then gpu.setForeground(self.fontColor) gpu.setBackground(self.color) end
     end
-
-    if i+self.shift==self.index then gpu.setForeground(self.sfColor) gpu.setBackground(self.selColor) end
-    gpu.set(self.X+b,self.Y+i+b, padRight(sub(line.label,1,w - b),w - b))
-    gpu.set(self.X+b,self.Y+i+b, padRight(sub(line.count,1,w),w))
-    gpu.set(self.X+b,self.Y+i+b, padRight(sub(line.delta,1,w - b),w - b))
-    if i+self.shift==self.index then gpu.setForeground(self.fontColor) gpu.setBackground(self.color) end
   end
 end
 
