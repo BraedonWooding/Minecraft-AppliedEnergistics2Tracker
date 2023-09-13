@@ -132,7 +132,7 @@ function run()
             Memory[name] = { label = name, count = count, delta = 0 }
             Table:insert(Memory[name])
         else
-            Memory[name].delta = count - Memory[name].count
+            Memory[name].delta = (count - Memory[name].count)/10
             Memory[name].count = count
         end
     end
@@ -143,7 +143,7 @@ end
 
 while true do
     run()
-    os.sleep(1)
+    os.sleep(10)
 end
 
 -- while true:
