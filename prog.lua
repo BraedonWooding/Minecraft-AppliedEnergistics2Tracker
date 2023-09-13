@@ -6,4 +6,5 @@ Form:setActive()
 
 Title = Form:addLabel(0, 0, "Item Tracking")
 
-forms.run(Form)
+while true:
+    forms.run(Form)
