@@ -113,6 +113,7 @@ end
 
 Table = Form:addTable(1, 2)
 Memory = {}
+First = 0
 
 function run()
     for idx = 1, #main do
@@ -127,21 +128,23 @@ function run()
             count = count + storedItems[idx].size
         end
 
-        if #Memory == 0 then
+        if First == 0 then
             Memory[name] = { label = name, count = count, delta = 0 }
             Table:insert(Memory[name])
         else
             Memory[name].delta = count - Memory[name].count
             Memory[name].count = count
         end
-
-        print(name)
     end
 
+    First = 1
     Form:redraw()
 end
 
-run()
+while true do
+    run()
+    os.sleep(1)
+end
 
 -- while true:
 --     forms.run(Form)
