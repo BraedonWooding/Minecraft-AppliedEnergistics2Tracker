@@ -13,13 +13,129 @@ local width = Form.W
 
 Title = Form:addLabel(width / 2 - 5, 1, "Item Tracking")
 
-for idx = 1, #main do
-    name = main[idx][1]
-
-    print(name)
+function formatNum(n)
+    if n >= 10^9 then
+        return string.format("%.2fB", n/10^9)
+    elseif n >= 10^6 then
+        return string.format("%.2fM", n/10^6)
+    elseif n >= 10^3 then
+        return string.format("%.2fk", n/10^3)
+    else
+        return tostring(math.floor(n))
+    end
 end
 
-Form:redraw()
+------- TTable
+
+local TTable=setmetatable({W=20, H=10, border=2, selColor=0x0000ff, sfColor=0xffff00, shift=0, index=0,
+  type=function() return "Table" end},TComponent)
+TTable.__index=TTable
+
+function TTable:paint()
+  local b= self.border==0 and 0 or 1
+  gpu.set(self.X+b,self.Y+b-1, padRight(sub("Label\t\tCount\t\tDelta",1,self.W-2*b),self.W-2*b))
+
+  for i=1,self.H-2*b do
+    local line = self.lines[i+self.shift]
+    local text = ""
+    if line then
+        text = line.label .. "\t\t" .. line.count .. "\t\t" .. line.delta
+    end
+
+    if i+self.shift==self.index then gpu.setForeground(self.sfColor) gpu.setBackground(self.selColor) end
+    gpu.set(self.X+b,self.Y+i+b-1, padRight(sub(text,1,self.W-2*b),self.W-2*b))
+    if i+self.shift==self.index then gpu.setForeground(self.fontColor) gpu.setBackground(self.color) end
+  end
+end
+
+function TTable:clear()
+  self.shift=0 self.index=0 self.lines={} self.items={}
+  self:redraw()
+end
+
+function TTable:insert(pos,line)
+  -- allow just insert(line)
+  if type(pos)~="number" then pos,line=#self.lines+1,pos end
+  table.insert(self.lines,pos,line)
+  if self.index<1 then self.index=1 end
+  if pos<self.shift+self.H-1 then self:redraw() end
+end
+
+function TTable:sort(comp)
+  comp=comp or function(list,i,j) return list.lines[j].count > list.lines[i].count end
+  for i=1,#self.lines-1 do
+    for j=i+1,#self.lines do
+      if comp(self,i,j) then
+        if self.index==i then self.index=j
+        elseif self.index==j then self.index=i end
+        self.lines[i],self.lines[j]=self.lines[j],self.lines[i]
+      end
+    end
+  end
+  self:redraw()
+end
+
+function TTable:touch(x, y, btn, user)
+--   local b= self.border==0 and 0 or 1
+--   if x>b and x<=self.W-b and y>b and y<=self.H-b and btn==0 then
+--     local i=self.shift+y-b
+--     if self.index~=i and self.lines[i] then
+--       self.index=i
+--       self:redraw()
+--       if self.onChange then self:onChange(self.lines[i],self.items[i],user) end
+--     end
+--   end
+end
+
+function TTable:scroll(x, y, sh, user)
+  local b= self.border==0 and 0 or 1
+  self.shift=self.shift-sh
+  if self.shift>#(self.lines)-self.H+2*b then self.shift=#(self.lines)-self.H+2*b end
+  if self.shift<0 then self.shift=0 end
+  self:redraw()
+end
+
+-------
+
+function Form:addTable(left, top)
+    local obj={left=left, top=top, lines={}}
+    self:makeChild(obj)
+    return setmetatable(obj,TTable)
+end
+
+-- main loop
+
+Table = Form:addTable(1, 2)
+Memory = {}
+
+function run()
+    for idx = 1, #main do
+        name = main[idx][1]
+
+        storedItems = meController.getItemsInNetwork({
+            label = name
+        })
+
+        count = 0
+        for idx = 1, #storedItems do
+            count = count + storedItems[idx].size
+        end
+
+        if #Memory == 0 then
+            Memory[name] = { label = name, count = count, delta = 0 }
+            Table.insert(Memory[name])
+        else
+            Memory[name].delta = count - Memory[name].count
+            Memory[name].count = count
+        end
+
+        print(name)
+    end
+
+    Form:redraw()
+end
+
+run()
 
 -- while true:
 --     forms.run(Form)
