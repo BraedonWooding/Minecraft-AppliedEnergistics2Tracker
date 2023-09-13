@@ -1,5 +1,8 @@
 local forms = require("forms")
 local component = require("component")
+local gpu = component.gpu
+local sub=require("unicode").sub
+local padRight=require("text").padRight
 
 meController = component.proxy(component.me_controller.address)
 
@@ -28,12 +31,16 @@ end
 ------- TTable
 
 local TTable=setmetatable({W=20, H=10, border=2, selColor=0x0000ff, sfColor=0xffff00, shift=0, index=0,
-  type=function() return "Table" end},TComponent)
+  type=function() return "Table" end},Form.__index)
 TTable.__index=TTable
 
 function TTable:paint()
   local b= self.border==0 and 0 or 1
-  gpu.set(self.X+b,self.Y+b-1, padRight(sub("Label\t\tCount\t\tDelta",1,self.W-2*b),self.W-2*b))
+  local w = math.floor(self.W / 3)
+
+  gpu.set(self.X+b,self.Y+b, padRight(sub("Label",1,w - b),w - b))
+  gpu.set(self.X+b + w,self.Y+b, padRight(sub("Count",1,w),w))
+  gpu.set(self.X+b + 2 * w,self.Y+b, padRight(sub("Delta",1,w - b),w - b))
 
   for i=1,self.H-2*b do
     local line = self.lines[i+self.shift]
@@ -43,7 +50,9 @@ function TTable:paint()
     end
 
     if i+self.shift==self.index then gpu.setForeground(self.sfColor) gpu.setBackground(self.selColor) end
-    gpu.set(self.X+b,self.Y+i+b-1, padRight(sub(text,1,self.W-2*b),self.W-2*b))
+    gpu.set(self.X+b,self.Y+i+b, padRight(sub(line.label,1,w - b),w - b))
+    gpu.set(self.X+b,self.Y+i+b, padRight(sub(line.count,1,w),w))
+    gpu.set(self.X+b,self.Y+i+b, padRight(sub(line.delta,1,w - b),w - b))
     if i+self.shift==self.index then gpu.setForeground(self.fontColor) gpu.setBackground(self.color) end
   end
 end
@@ -123,7 +132,7 @@ function run()
 
         if #Memory == 0 then
             Memory[name] = { label = name, count = count, delta = 0 }
-            Table.insert(Memory[name])
+            Table:insert(Memory[name])
         else
             Memory[name].delta = count - Memory[name].count
             Memory[name].count = count
