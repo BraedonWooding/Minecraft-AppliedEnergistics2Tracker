@@ -13,8 +13,8 @@ local width = Form.W
 
 Title = Form:addLabel(width / 2 - 5, 1, "Item Tracking")
 
-for item in main do
-    name = item[1]
+for idx = 1, #main do
+    name = main[idx][1]
 
     print(name)
 end
