@@ -17,8 +17,8 @@ local output = {}
 
 for i = 0, #items do
     local item = items[i]
-    if item.count >= minItems then
-        output:insert(item.label)
+    if item and item.size >= minItems then
+        table.insert(output, item.label)
     end
 end
 
