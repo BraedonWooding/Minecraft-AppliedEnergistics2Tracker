@@ -2,6 +2,8 @@
 
 Produces something like this;
 
+<img width="1311" alt="image" src="https://github.com/BraedonWooding/Minecraft-AppliedEnergistics2Tracker/assets/22880786/d84f543c-f2c1-4f95-8f77-f8ded52ead1d">
+
 ## How to run
 
 Run the following in the root directory of the OpenComputers terminal
