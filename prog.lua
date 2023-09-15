@@ -4,9 +4,16 @@ local gpu = component.gpu
 local sub=require("unicode").sub
 local padRight=require("text").padRight
 
+local Json = require("json")
+
 meController = component.proxy(component.me_controller.address)
 
-require("track")
+local f = io.open("items.json", "r")
+local itemsRaw = f:read("*a")
+local items = Json.decode(itemsRaw)
+
+-- for reducing memory
+itemsRaw = ""
 
 local Form = forms.addForm()
 
@@ -116,8 +123,8 @@ Memory = {}
 First = 0
 
 function run()
-    for idx = 1, #main do
-        name = main[idx][1]
+    for idx = 1, #items do
+        name = items[idx]
 
         storedItems = meController.getItemsInNetwork({
             label = name
